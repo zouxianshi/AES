@@ -1,0 +1,25 @@
+<resources>
+
+    <string name="Text_Content">请输入加密字符</string>
+    <string name="Text_File">文件路径</string>
+    <string name="Button_Browse">浏览</string>
+    <string name="Text_Key">请输入密码</string>
+    <string name="Text_Result">加解密结果</string>
+    <string name="Button_Encrypt">加密</string>
+    <string name="Button_Decrypt">解密</string>
+    <string name="Text_Privatepath">存储路径:</string>
+    <string name="app_name">AndroidAES</string>
+    <string name="_16">请输入16进制文本</string>
+    <string name="SubBytes">S盒置换</string>
+    <string name="shiftrow">行移位</string>
+    <string name="mixcolumns">列混淆</string>
+    <string name="addrawkey">轮密钥加</string>
+    <string name="out">输出</string>
+    <string name="execute">执行</string>
+    <string name="YES">是</string>
+    <string name="NO">否</string>
+    <string name="raws">10</string>
+    <string name="Positive">正序</string>
+    <string name="inverted">倒序</string>
+    <string name="xor">请输入异或矩阵</string>
+</resources>

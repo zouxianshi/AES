@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+    <EditText
+            android:id="@+id/input"
+            android:layout_width="323dp"
+            android:layout_height="100dp"
+            android:background="@drawable/view_bg"
+            android:hint="@string/_16"
+            android:alpha="0.5"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rgSex"
+            android:textSize="20sp"
+            android:layout_marginTop="36dp"
+            android:layout_marginStart="20dp"/>
+
+    <EditText
+            android:id="@+id/rawkey_Edit"
+            android:layout_width="323dp"
+            android:layout_height="100dp"
+            android:background="@drawable/view_bg"
+            android:hint="@string/xor"
+            android:alpha="0.5"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/input"
+            android:textSize="20sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="20dp"/>
+
+
+    <EditText
+            android:id="@+id/print"
+            android:layout_width="323dp"
+            android:layout_height="120dp"
+            android:background="@drawable/view_bg"
+            android:hint="@string/out"
+            android:alpha="0.5"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rawkey_Edit"
+            android:textSize="20sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="20dp"/>
+
+    <RadioGroup
+            android:id="@+id/rgSex"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+        <RadioButton
+                android:id="@+id/subBytes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:button="@null"
+                android:checked="true"
+                android:drawableStart="@android:drawable/btn_radio"
+                android:text="@string/SubBytes"/>
+
+        <RadioButton
+                android:id="@+id/shiftrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="-48dp"
+                android:button="@null"
+                android:drawableStart="@android:drawable/btn_radio"
+                android:text="@string/shiftrow"/>
+
+        <RadioButton
+                android:id="@+id/mixcolumns"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="30dp"
+                android:button="@null"
+                android:drawableStart="@android:drawable/btn_radio"
+                android:text="@string/mixcolumns"/>
+
+        <RadioButton
+                android:id="@+id/addrawkey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="150dp"
+                android:layout_marginTop="-48dp"
+                android:button="@null"
+                android:drawableStart="@android:drawable/btn_radio"
+                android:text="@string/addrawkey"/>
+    </RadioGroup>
+
+    <RadioGroup
+            android:id="@+id/Mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/print"
+            android:layout_marginStart="20dp">
+
+        <RadioButton
+                android:id="@+id/Positive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:checked="true"
+                android:drawableStart="@android:drawable/btn_radio"
+                android:text="@string/Positive"/>
+
+        <RadioButton
+                android:id="@+id/inverted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:drawableStart="@android:drawable/btn_radio"
+                android:text="@string/inverted"/>
+    </RadioGroup>
+
+    <Button
+            android:id="@+id/execute"
+            android:layout_height="57dp"
+            android:layout_width="164dp"
+            android:background="@drawable/button_bg"
+            android:text="@string/execute"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/print"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="10dp"/>
+
+</android.support.constraint.ConstraintLayout>
