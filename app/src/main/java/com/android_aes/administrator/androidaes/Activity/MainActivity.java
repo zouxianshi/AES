@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     EditText Text_Key;
     EditText Text_File;
     TextView Text_Result;
+    EditText Secrectkey;
     private TextView Text_Path;
 
     @Override
@@ -74,6 +75,9 @@ public class MainActivity extends AppCompatActivity {
         Text_Result = findViewById ( R.id.Text_Result );
         Text_File = findViewById ( R.id.Text_File );
         Text_Path = findViewById ( R.id.Text_Privatepath );
+        Secrectkey = findViewById ( R.id.secrectkey );
+
+
 
         String privatePath = Objects.requireNonNull ( getExternalFilesDir ( Environment.DIRECTORY_DOWNLOADS ) ).toString ();
         Text_Path.setText ( "文件路径:"+privatePath );
@@ -96,20 +100,27 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
 
             //点击加密处理方法
+            int round = 10;
             if (v.getId () == R.id.Button_Encrypt) {
                 //获取用户输入内容和密码
                 String filepath = Text_File.getText ().toString ().trim ();
                 String password = Text_Key.getText ().toString ().trim ();
                 String content = Text_Content.getText ().toString ().trim ();
                 String filename = Text_Result.getText ().toString ().trim ();
-                //判断文件路径和密码是否为空
+                String rounds = Secrectkey.getText ().toString ().trim ();
+
+                try {
+                    round = Integer.parseInt(rounds);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
                 if (TextUtils.isEmpty ( filepath ) || TextUtils.isEmpty ( password )) {
                     if (TextUtils.isEmpty ( content ) || TextUtils.isEmpty ( password )) {
                         Toast.makeText ( MainActivity.this, "内容或密码不能为空", Toast.LENGTH_SHORT ).show ();
                     } else {
                         try{
                             AESCipher AESCipher = new AESCipher ();
-                            String result = AESCipher.encrypt ( content, password );
+                            String result = AESCipher.encrypt ( content, password ,round);
                             Text_Result.setText ( result );
                             Toast.makeText ( getApplicationContext (), "加密成功", Toast.LENGTH_SHORT ).show ();
                         }catch (Exception e){
@@ -149,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         try{
                             AESCipher AESCipher = new AESCipher ();
-                            String result = AESCipher.decrypt ( content, password );
+                            String result = AESCipher.decrypt ( content, password ,round);
                             Text_Result.setText ( result );
                             Toast.makeText ( getApplicationContext (), "解密成功", Toast.LENGTH_SHORT ).show ();
                         }catch (Exception e){

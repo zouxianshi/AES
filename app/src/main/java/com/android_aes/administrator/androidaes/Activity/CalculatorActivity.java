@@ -88,7 +88,6 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
         try {
             switch (checkedId) {
                 case R.id.subBytes:
-//                    String subbyte = "d9c7d56954307ea95d3cc54f7b93bb1e";//d9c7d56954307ea95d3cc54f7b93bb1e//e531b5e4fd088ab78d6d07920322fee9
                     short[][] initialTextState = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( INPUT ) ) );
                     short[][] result = AESCipher.substituteState ( initialTextState, Sbox );
                     print.setText ( AESCipher.getStateHex ( result ) );
@@ -96,7 +95,6 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                     break;
 
                 case R.id.shiftrow:
-//                    String shiftrow = "d930c51e543cbb695d93d5a97bc77e4f";//d930c51e543cbb695d93d5a97bc77e4f//d9c7d56954307ea95d3cc54f7b93bb1e
                     initialTextState = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( INPUT ) ) );
                     result = AESCipher.shiftRows ( initialTextState, Shift_table );
                     print.setText ( AESCipher.getStateHex ( result ) );
@@ -104,7 +102,6 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                     break;
 
                 case R.id.mixcolumns:
-//                    String mixcolumns = "22f35ab93e93bea968ad9fe8952391aa";//22f35ab93e93bea968ad9fe8952391aa//d930c51e543cbb695d93d5a97bc77e4f
                     initialTextState = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( INPUT ) ) );
                     result = AESCipher.mixColumns ( initialTextState, Mixcolumns_table );
                     rawkey_edit.setText ( "" );
@@ -112,8 +109,6 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                     break;
 
                 case R.id.addrawkey:
-//                    String addrawkey = "6598c89cdea504440b643d3062832e8c";//22f35ab93e93bea968ad9fe8952391aa
-//                    String roundkey = "476b9225e036baed63c9a2d8f7a0bf26";//6598c89cdea504440b643d3062832e8c
                     String RAWKEY = rawkey_edit.getText ().toString ().trim ();
                     initialTextState = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( INPUT ) ) );
                     short[][] initialroundkey = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( RAWKEY ) ) );

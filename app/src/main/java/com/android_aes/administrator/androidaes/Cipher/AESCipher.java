@@ -18,7 +18,7 @@ public class AESCipher implements CipherService {
      * 对外的解密接口
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String decrypt(String encryptedText, String key) throws Exception {
+    public String decrypt(String encryptedText, String key,int rounds) throws Exception {
         System.out.println("\n\n#####################  decryption  #####################");
         System.out.println ( encryptedText );
         short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(encryptedText) ));
@@ -30,7 +30,7 @@ public class AESCipher implements CipherService {
         ArrayUtil.printInfo("初始加密矩阵", getStateHex(initialTextState), false);
         ArrayUtil.printInfo("初始密钥矩阵", getStateHex(initialKeyState), true);
 
-        short[][] decryptState = coreDecrypt(initialTextState, initialKeyState);
+        short[][] decryptState = coreDecrypt(initialTextState, initialKeyState , rounds);
         String plaintext = getOrigin(decryptState);
         ArrayUtil.printInfo("plaintext", plaintext, false);
         return plaintext;
@@ -52,8 +52,8 @@ public class AESCipher implements CipherService {
     /**
      * 解密逻辑：将可逆操作抽取
      */
-    private short[][] coreDecrypt(short[][] encryptedTextState, short[][] keyState) throws IOException {
-        int MODE = 1;
+    private short[][] coreDecrypt(short[][] encryptedTextState, short[][] keyState,int rounds) throws IOException {
+        int MODE = 1 ;
         short[][] rawRoundKeys = generateRoundKeys(keyState);
         System.out.println("RoundKeys");
         printRoundKeys(rawRoundKeys);
@@ -67,7 +67,8 @@ public class AESCipher implements CipherService {
         short[][][] inverseRoundKeys = inverseRoundKeys(roundKeys);
         System.out.println("inverse roundKeys");
         printRoundKeys(inverseRoundKeys);
-        return coreEncrypt(encryptedTextState, inverseRoundKeys, AESConstants.INVERSE_SUBSTITUTE_BOX, AESConstants.INVERSE_CX, AESConstants.INVERSE_SHIFTING_TABLE,MODE);
+        return coreEncrypt(encryptedTextState, inverseRoundKeys, AESConstants.
+                INVERSE_SUBSTITUTE_BOX, AESConstants.INVERSE_CX, AESConstants.INVERSE_SHIFTING_TABLE,MODE,rounds);
     }
 
     /**
@@ -82,12 +83,13 @@ public class AESCipher implements CipherService {
         return result;
     }
 
+
     /**
      * 对外的加密接口
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public String encrypt(String content, String password) throws IOException {
+    public String encrypt(String content, String password,int rounds) throws IOException {
         int MODE = 0;
         System.out.println("#####################  加密  #####################");
         ArrayUtil.printInfo("明文", content, false);
@@ -109,7 +111,7 @@ public class AESCipher implements CipherService {
         short[][][] roundKeys = transfer(rawRoundKeys);
 
         short[][] finalState = coreEncrypt(text, roundKeys, AESConstants.SUBSTITUTE_BOX,
-                AESConstants.CX, AESConstants.SHIFTING_TABLE,MODE);
+                AESConstants.CX, AESConstants.SHIFTING_TABLE,MODE,rounds);
         System.out.println ("abc"+transfer2Bytes(finalState) );
         return Base64Util.encode(transfer2Bytes(finalState));
 }
@@ -127,24 +129,28 @@ public class AESCipher implements CipherService {
 
     private short[][] coreEncrypt(short[][] initialPTState,
                                   short[][][] roundKeys, short[][] substituteTable,
-                                  short[][] mixColumnTable, short[][] shiftingTable,int MODE) throws IOException {
+                                  short[][] mixColumnTable, short[][] shiftingTable,int MODE,int rounds) throws IOException {
        // String privatePath = Objects.requireNonNull (Environment.DIRECTORY_DOWNLOADS );
        // FileWriter file = new FileWriter (privatePath+"/"+"加密过程.txt",true);
         FileWriter file = new FileWriter ("C://Users//Administrator/Desktop//AES加密流程.txt",true);
-        String M;
-        if (MODE==0){
-            file.write (  "------------------加密过程------------------"+ "\r\n\r\n");
-            M="";
-        }else{
-            file.write (  "------------------解密过程------------------"+ "\r\n\r\n");
-            M = "Inv";
+        String M = "";
+        switch (MODE){
+            case 0:
+                file.write (  "------------------加密过程------------------"+ "\r\n\r\n");
+                M="";
+                break;
+            case 1:
+                file.write (  "------------------解密过程------------------"+ "\r\n\r\n");
+                M = "Inv";
+                break;
         }
+
 
         // 初始轮密钥加，异或操作
         short[][] state = xor(roundKeys[0], initialPTState);
         file.write (  "AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
         // 处理前九轮变换
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < rounds - 1; i++) {
             int N = i + 1;
             file.write ( "第"+N+"轮\r\n");
             System.out.println("N = " + N);
@@ -162,14 +168,20 @@ public class AESCipher implements CipherService {
             file.write (  M + "MixColumns:"+getStateHex(state) + "\r\n");
             // 轮密钥加变换
             ArrayUtil.printInfo("RoundKey", getStateHex(roundKeys[i + 1]), false);
-            state = xor(roundKeys[i + 1], state);
+            switch (MODE){
+                case 0:
+                    state = xor(roundKeys[ i + 1], state);
+                    break;
+                case 1:
+                    state = xor(roundKeys[ i + 11 - rounds ], state);
+            }
             ArrayUtil.printInfo("AddRoundKeys", getStateHex(state), true);
             file.write (  M + "AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
         }
 
         // 处理最后一轮
-        file.write ( "第10轮\r\n" );
-        System.out.println("N = 10");
+        file.write ( "最终轮\r\n" );
+        System.out.println("N = last");
         state = substituteState(state, substituteTable);
         ArrayUtil.printInfo("SubBytes", getStateHex(state), false);
         file.write (  M+"SubBytes:"+getStateHex(state) +"\r\n");
@@ -388,17 +400,17 @@ public class AESCipher implements CipherService {
      * 打印轮密钥数组
      */
     private void printRoundKeys(short[][] roundKeys) throws IOException {
-        FileWriter fileWriter = new FileWriter ("C://Users//Administrator/Desktop//AES密钥扩展.txt",true);
+//        FileWriter fileWriter = new FileWriter ("C://Users//Administrator/Desktop//AES密钥扩展.txt",true);
         for (int i = 0, keyOrder = 1; i < roundKeys.length; i += 4, keyOrder++) {
             String infoKValue = getStateHex(new short[][]{
                     roundKeys[i], roundKeys[i + 1],
                     roundKeys[i + 2], roundKeys[i + 3]
             });
             ArrayUtil.printInfo("[RoundKey " + keyOrder + "]", infoKValue , false);
-            fileWriter.write ( "[RoundKey " + keyOrder + "]"+infoKValue+"\r\n");
+//            fileWriter.write ( "[RoundKey " + keyOrder + "]" + infoKValue+ "\r\n" );
         }
         System.out.println();
-        fileWriter.close ();
+//        fileWriter.close ();
     }
 
     /**

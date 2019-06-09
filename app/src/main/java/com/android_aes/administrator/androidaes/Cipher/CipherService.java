@@ -10,7 +10,7 @@ public interface CipherService {
      * @param key key
      * @return encrypted text
      */
-    String encrypt(String plaintext, String key) throws IOException;
+    String encrypt(String plaintext, String key,int rounds) throws IOException;
 
     /**
      * decrypt encrypted text with key
@@ -18,5 +18,5 @@ public interface CipherService {
      * @param key key
      * @return origin plaintext
      */
-    String decrypt(String encryptedText, String key) throws Exception;
+    String decrypt(String encryptedText, String key,int rounds) throws Exception;
 }
