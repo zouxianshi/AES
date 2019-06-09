@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="Android SQLite" uuid="6654b4ca-f6c4-4933-8511-eee437e9f3a0">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <remarks>AndroidAES</remarks>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\Administrator\.IntelliJIdea2018.3\system\android\databases\EMULATOR_Nexus_4_API_28\com.android_aes.administrator.androidaes\external\files</jdbc-url>
+    </data-source>
+  </component>
+</project>
