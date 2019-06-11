@@ -20,11 +20,12 @@ public class ExampleUnitTest{
         System.out.println("密码：" +password);
         // 加密
         File file1 = new File ( "C://Users//Administrator/Desktop//AES加密流程.txt" );
+        String filepath = "C://Users//Administrator/Desktop//AES加密流程.txt";
         if (file1.exists ()){
             file1.delete ();
         }
         AESCipher AESCipher = new AESCipher ();
-        String encrypt = AESCipher.encrypt ( content ,password,round,file1);
+        String encrypt = AESCipher.encrypt ( content ,password,round,filepath,true,true);
         assert encrypt != null;
 //        short[][] initialTextState = AESCipher.transfer( Base64Util.decodeToShorts(encrypt));
         String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(AESCipher.transfer( Base64Util.decodeToShorts(encrypt))));
@@ -32,7 +33,7 @@ public class ExampleUnitTest{
 
 
 
-        String decrypt = AESCipher.decrypt ( message,password,round,A );
+        String decrypt = AESCipher.decrypt ( message,password,round,filepath,true,true );
 
         System.out.println("解密后的内容：" + decrypt  );
     }
