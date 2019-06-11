@@ -22,4 +22,13 @@
     <string name="Positive">正序</string>
     <string name="inverted">倒序</string>
     <string name="xor">请输入异或矩阵</string>
+    <string name="save">保存</string>
+    <string name="MainActivity">主界面</string>
+    <string name="CalculatorActivity">验证计算器</string>
+    <string name="SettingActivity">设置</string>
+    <string name="Exit">退出</string>
+    <string name="inputraw">请输入迭代轮数:</string>
+    <string name="filepath">输出文件路径:</string>
+    <string name="process">是否导出加解密过程:</string>
+    <string name="rawkey">是否导出密钥扩展过程:</string>
 </resources>

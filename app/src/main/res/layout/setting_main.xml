@@ -12,7 +12,7 @@
             android:layout_width="163dp"
             android:layout_height="27dp"
             android:alpha="0.5"
-            android:text="请输入迭代轮数:"
+            android:text="@string/inputraw"
             android:textSize="20sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -23,24 +23,24 @@
             android:textColor="@android:color/background_dark"/>
 
     <EditText
-            android:id="@+id/secrectkey"
+            android:id="@+id/rounds"
             android:layout_width="100dp"
             android:layout_height="40dp"
             android:gravity="top"
-            android:text="@string/raws"
             android:background="@drawable/view_bg"
             android:alpha="0.5"
             android:textSize="20sp"
             app:layout_constraintLeft_toRightOf="@id/inputraw"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginTop="30dp"
-            android:inputType="number"/>
+            android:inputType="number"
+            tools:ignore="LabelFor"/>
     <TextView
             android:id="@+id/filepath"
             android:layout_width="323dp"
             android:layout_height="wrap_content"
             android:alpha="0.5"
-            android:text="默认文件路径:"
+            android:text="@string/filepath"
             app:layout_constraintLeft_toLeftOf="@id/inputraw"
             app:layout_constraintTop_toBottomOf="@id/inputraw"
             android:textSize="20sp"
@@ -62,7 +62,7 @@
             android:layout_width="330dp"
             android:layout_height="wrap_content"
             android:alpha="0.5"
-            android:text="是否导出加解密过程:"
+            android:text="@string/process"
             android:textColor="@android:color/background_dark"
             android:orientation="horizontal"
             app:layout_constraintLeft_toLeftOf="@id/path"
@@ -83,7 +83,7 @@
             tools:ignore="MissingConstraints" >
 
         <RadioButton
-                android:id="@+id/radio0"
+                android:id="@+id/radio1"
                 android:layout_width="180dp"
                 android:layout_height="wrap_content"
                 android:button="@null"
@@ -91,7 +91,7 @@
                 android:layout_marginStart="50dp"
                 android:text="@string/YES"/>
         <RadioButton
-                android:id="@+id/radio1"
+                android:id="@+id/radio2"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:button="@null"
@@ -105,7 +105,7 @@
             android:layout_width="330dp"
             android:layout_height="wrap_content"
             android:alpha="0.5"
-            android:text="是否导出密钥扩展过程:"
+            android:text="@string/rawkey"
             android:textColor="@android:color/background_dark"
             android:orientation="horizontal"
             app:layout_constraintLeft_toLeftOf="@id/path"
@@ -141,4 +141,16 @@
                 android:checked="true"
                 android:text="@string/NO"/>
     </RadioGroup>
+    <Button
+            android:id="@+id/save"
+            android:layout_height="50dp"
+            android:layout_width="100dp"
+            android:background="@drawable/button_bg"
+            android:text="@string/save"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/rg"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"/>
 </android.support.constraint.ConstraintLayout>

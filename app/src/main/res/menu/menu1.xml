@@ -2,11 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
         <item
                 android:id="@+id/main"
-                android:title="主界面" />
+                android:title="@string/MainActivity" />
         <item
                 android:id="@+id/Button_Calculator"
-                android:title="验证计算器" />
+                android:title="@string/CalculatorActivity" />
         <item
                 android:id="@+id/Button_setting"
-                android:title="设置" />
+                android:title="@string/SettingActivity" />
+        <item
+                android:id="@+id/Button_Exit"
+                android:title="@string/Exit" />
 </menu>

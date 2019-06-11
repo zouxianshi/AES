@@ -2,6 +2,7 @@ package com.android_aes.administrator.androidaes.Activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,8 +18,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android_aes.administrator.androidaes.*;
+import com.android_aes.administrator.androidaes.AesUtils;
 import com.android_aes.administrator.androidaes.Cipher.AESCipher;
+import com.android_aes.administrator.androidaes.Cipher.Base64Util;
+import com.android_aes.administrator.androidaes.R;
+import com.android_aes.administrator.androidaes.UriToPathUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -55,6 +59,9 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent2 = new Intent( MainActivity.this, MainActivity.class);
                 startActivity(intent2);
                 break;
+            case R.id.Button_Exit:
+                System.exit ( 0 );
+                break;
             default:
                 break;
         }
@@ -75,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         Text_Result = findViewById ( R.id.Text_Result );
         Text_File = findViewById ( R.id.Text_File );
         Text_Path = findViewById ( R.id.Text_Privatepath );
-        Secrectkey = findViewById ( R.id.secrectkey );
+        Secrectkey = findViewById ( R.id.rounds );
 
 
 
@@ -98,30 +105,28 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("SetTextI18n")
         @Override
         public void onClick(View v) {
-
+            SharedPreferences preference = getSharedPreferences("setting",MODE_PRIVATE);
+            boolean PrintFile = preference.getBoolean ( "radioButton1_1" ,false);
+            boolean PrintRawkey = preference.getBoolean ( "radioButton2_1",false);
+            String privatePath = Objects.requireNonNull ( getExternalFilesDir ( Environment.DIRECTORY_DOWNLOADS ) ).toString ();
+            int round = preference.getInt ( "rounds",10);
             //点击加密处理方法
-            int round = 10;
             if (v.getId () == R.id.Button_Encrypt) {
                 //获取用户输入内容和密码
                 String filepath = Text_File.getText ().toString ().trim ();
                 String password = Text_Key.getText ().toString ().trim ();
                 String content = Text_Content.getText ().toString ().trim ();
                 String filename = Text_Result.getText ().toString ().trim ();
-                String rounds = Secrectkey.getText ().toString ().trim ();
 
-                try {
-                    round = Integer.parseInt(rounds);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
                 if (TextUtils.isEmpty ( filepath ) || TextUtils.isEmpty ( password )) {
                     if (TextUtils.isEmpty ( content ) || TextUtils.isEmpty ( password )) {
                         Toast.makeText ( MainActivity.this, "内容或密码不能为空", Toast.LENGTH_SHORT ).show ();
                     } else {
                         try{
                             AESCipher AESCipher = new AESCipher ();
-                            String result = AESCipher.encrypt ( content, password ,round);
-                            Text_Result.setText ( result );
+                            String result = AESCipher.encrypt ( content, password ,round,privatePath ,PrintFile,PrintRawkey);
+                            String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(AESCipher.transfer( Base64Util.decodeToShorts(result))));
+                            Text_Result.setText (  message );
                             Toast.makeText ( getApplicationContext (), "加密成功", Toast.LENGTH_SHORT ).show ();
                         }catch (Exception e){
                             e.printStackTrace ();
@@ -130,11 +135,11 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 } else {
-                    String privatePath = Objects.requireNonNull ( getExternalFilesDir ( Environment.DIRECTORY_DOWNLOADS ) ).toString ();
                     Log.d ( TAG, "公共存储路径" + privatePath );
                     String savePath = privatePath +"/"+ filename + "_加密.txt";
                     try {
-                        Encrypt.fileEncrpty ( password, filepath, savePath );
+                        AESCipher AESCipher = new AESCipher ();
+                        AESCipher.fileEncrpty ( password, filepath, savePath );
                         Text_Path.setText ( "存储路径:"+savePath );
                         Toast.makeText ( getApplicationContext (), "加密成功", Toast.LENGTH_SHORT ).show ();
                     } catch (Exception e) {
@@ -143,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
+
 
              //点击解密处理方法
             if (v.getId () == R.id.Button_Decrypt) {
@@ -160,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         try{
                             AESCipher AESCipher = new AESCipher ();
-                            String result = AESCipher.decrypt ( content, password ,round);
+                            String result = AESCipher.decrypt ( content, password ,round,privatePath,PrintFile,PrintRawkey);
                             Text_Result.setText ( result );
                             Toast.makeText ( getApplicationContext (), "解密成功", Toast.LENGTH_SHORT ).show ();
                         }catch (Exception e){
@@ -170,11 +177,9 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 } else {
-                    String privatePath = Objects.requireNonNull ( getExternalFilesDir ( Environment.DIRECTORY_DOWNLOADS ) ).toString ();
-                    Log.d ( TAG, "公共存储路径" + privatePath );
                     String savePath = privatePath + "/" + filename + "_解密.txt";
                     try {
-                        Decrypt.fileDecrpty ( password, filepath, savePath );
+                        AESCipher.fileDecrpty ( password, filepath, savePath );
                         System.out.println ( savePath );
                         Text_Path.setText ( "存储路径:"+savePath );
                         Toast.makeText ( getApplicationContext (), "解密成功", Toast.LENGTH_SHORT ).show ();
@@ -184,6 +189,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+
+
+
 
             //点击浏览处理方法
             if (v.getId () == R.id.Button_Browse) {
@@ -196,6 +204,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+
 
     //调用文件选择器
     private static final int FILE_SELECT_CODE = 0;
@@ -210,6 +220,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
+
     //回传获取到的路径和文件名
     private static final String TAG = "ChooseFile";
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -217,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == FILE_SELECT_CODE) {
             if (resultCode == RESULT_OK) {
-                // Get the Uri of the selected file
                String url = Objects.requireNonNull ( data.getData () ).toString ();
                String URL = null;
                 try {

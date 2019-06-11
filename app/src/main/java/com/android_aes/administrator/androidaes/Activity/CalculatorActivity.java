@@ -6,7 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Toast;
 import com.android_aes.administrator.androidaes.Cipher.AESCipher;
 import com.android_aes.administrator.androidaes.Cipher.AESConstants;
 import com.android_aes.administrator.androidaes.Cipher.ArrayUtil;
@@ -38,6 +41,9 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                 Intent intent2 = new Intent ( CalculatorActivity.this, MainActivity.class );
                 startActivity ( intent2 );
                 break;
+            case R.id.Button_Exit:
+                finishAffinity ();
+                break;
             default:
                 break;
         }
@@ -50,7 +56,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
 
         input = findViewById ( R.id.input );
         print = findViewById ( R.id.print );
-        radioGroup1 = findViewById ( R.id.rgSex );
+        radioGroup1 = findViewById ( R.id.process );
         radioGroup2 = findViewById ( R.id.Mode );
         rawkey_edit = findViewById ( R.id.rawkey_Edit );
         Button execute = findViewById ( R.id.execute );
@@ -120,5 +126,6 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
             e.printStackTrace ();
             Toast.makeText ( CalculatorActivity.this, "请输入正确内容", Toast.LENGTH_SHORT ).show ();
         }
+        Toast.makeText ( CalculatorActivity.this, "计算成功", Toast.LENGTH_SHORT ).show ();
     }
 }

@@ -2,11 +2,9 @@ package com.android_aes.administrator.androidaes;
 
 
 import com.android_aes.administrator.androidaes.Cipher.AESCipher;
-import com.android_aes.administrator.androidaes.Cipher.AESConstants;
-import com.android_aes.administrator.androidaes.Cipher.ArrayUtil;
 import com.android_aes.administrator.androidaes.Cipher.Base64Util;
+
 import java.io.File;
-import java.io.IOException;
 
 
 public class ExampleUnitTest{
@@ -16,7 +14,7 @@ public class ExampleUnitTest{
         String password = "1234567890123456";
         String rounds = "10";
         int round = Integer.parseInt(rounds);
-
+        String A = "C://Users//Administrator/Desktop//";
 
         System.out.println("加解密之前：" + content);
         System.out.println("密码：" +password);
@@ -26,15 +24,15 @@ public class ExampleUnitTest{
             file1.delete ();
         }
         AESCipher AESCipher = new AESCipher ();
-        String encrypt = AESCipher.encrypt ( content ,password,round);
+        String encrypt = AESCipher.encrypt ( content ,password,round,file1);
         assert encrypt != null;
-        short[][] initialTextState = AESCipher.transfer( Base64Util.decodeToShorts(encrypt));
-        String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(initialTextState));
+//        short[][] initialTextState = AESCipher.transfer( Base64Util.decodeToShorts(encrypt));
+        String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(AESCipher.transfer( Base64Util.decodeToShorts(encrypt))));
         System.out.println("加密后的内容：" + message);
 
 
 
-        String decrypt = AESCipher.decrypt ( message,password,round );
+        String decrypt = AESCipher.decrypt ( message,password,round,A );
 
         System.out.println("解密后的内容：" + decrypt  );
     }

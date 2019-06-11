@@ -1,16 +1,18 @@
 package com.android_aes.administrator.androidaes.Cipher;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 public interface CipherService {
     /**
      * encrypt plaintext with key
-     * @param plaintext text to be encrypted
-     * @param key key
+     * @param content text to be encrypted
+     * @param password key
+     * @param privatePath
+     * @param PrintFile
+     * @param printRawkey
      * @return encrypted text
      */
-    String encrypt(String plaintext, String key,int rounds) throws IOException;
+    String encrypt(String content, String password, int rounds, String privatePath, boolean PrintFile, boolean printRawkey) throws IOException;
 
     /**
      * decrypt encrypted text with key
@@ -18,5 +20,5 @@ public interface CipherService {
      * @param key key
      * @return origin plaintext
      */
-    String decrypt(String encryptedText, String key,int rounds) throws Exception;
+    String decrypt(String encryptedText, String key,int rounds,String privatepath,boolean PrintFile,boolean printRawkey) throws Exception;
 }
