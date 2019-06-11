@@ -101,7 +101,7 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
                     break;
 
                 case R.id.shiftrow:
-                    initialTextState = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( INPUT ) ) );
+                    initialTextState = AESCipher.transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(INPUT) ));
                     result = AESCipher.shiftRows ( initialTextState, Shift_table );
                     print.setText ( AESCipher.getStateHex ( result ) );
                     rawkey_edit.setText ( "" );
