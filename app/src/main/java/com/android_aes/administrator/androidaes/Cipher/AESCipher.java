@@ -383,8 +383,8 @@ public class AESCipher implements CipherService {
                                   short[][] mixColumnTable, short[][] shiftingTable, int MODE, int rounds, String privatePath, boolean P) throws IOException {
 
         File fileexist = new File ( privatePath+"/"+"加密过程.txt" );
-        FileWriter file = new FileWriter (privatePath+"/"+"加密过程.txt",true);
-//        FileWriter file = new FileWriter ("C://Users//Administrator/Desktop//AES加密流程.txt",true);
+//        FileWriter file = new FileWriter (privatePath+"/"+"加密过程.txt",true);
+        FileWriter file = new FileWriter ("C://Users//Administrator/Desktop//AES加密流程.txt",true);
         String M = "";
         switch (MODE){
             case 0:
@@ -496,8 +496,8 @@ public class AESCipher implements CipherService {
      * 打印轮密钥数组
      */
     private void printRoundKeys(short[][] roundKeys,String privatePath) throws IOException {
-        FileWriter fileWriter = new FileWriter (privatePath+"/"+"AES密钥扩展.txt",true);
-//        FileWriter fileWriter = new FileWriter ("C://Users//Administrator/Desktop//AES密钥扩展.txt",true);
+//        FileWriter fileWriter = new FileWriter (privatePath+"/"+"AES密钥扩展.txt",true);
+        FileWriter fileWriter = new FileWriter ("C://Users//Administrator/Desktop//AES密钥扩展.txt",true);
         for (int i = 0, keyOrder = 1; i < roundKeys.length; i += 4, keyOrder++) {
             String infoKValue = getStateHex(new short[][]{
                     roundKeys[i], roundKeys[i + 1],
@@ -514,8 +514,8 @@ public class AESCipher implements CipherService {
      * 打印三维轮密钥数组
      */
     private void printRoundKeys(short[][][] roundKeys,String privatePath) throws IOException {
-        FileWriter fileWriter = new FileWriter (privatePath+"/"+"AES密钥扩展.txt",true);
-//        FileWriter fileWriter = new FileWriter ( "C://Users//Administrator/Desktop//AES密钥扩展.txt",true);
+//        FileWriter fileWriter = new FileWriter (privatePath+"/"+"AES密钥扩展.txt",true);
+        FileWriter fileWriter = new FileWriter ( "C://Users//Administrator/Desktop//AES密钥扩展.txt",true);
 
         for (int i = 0; i < roundKeys.length; i++) {
             String infoKValue = getStateHex(roundKeys[i]);
