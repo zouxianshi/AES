@@ -10,7 +10,7 @@ package com.android_aes.administrator.androidaes;
          * @param buf
          * @return
          */
-        static String parseByte2HexStr(byte[] buf) {
+        public static String parseByte2HexStr(byte[] buf) {
             StringBuilder sb = new StringBuilder();
             for (byte b : buf) {
                 String hex = Integer.toHexString(b & 0xFF);

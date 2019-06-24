@@ -13,8 +13,6 @@ public class ArrayUtil {
      */
     public static short[] transferToShorts(String string) {
         byte[] bytes = string.getBytes();
-        Pkcs7 pkcs7 = new Pkcs7 ();
-        bytes = pkcs7.pkcs7_pad(bytes,8);
         int length = bytes.length;
         short[] shorts = new short[length];
         for (int i = 0; i < length; i++) {

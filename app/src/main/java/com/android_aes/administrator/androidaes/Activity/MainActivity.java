@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                String url = Objects.requireNonNull ( data.getData () ).toString ();
                String URL = null;
                 try {
-                    URL = URLDecoder.decode ( url, "UTF-8" );
+                    URL = URLDecoder.decode ( url, "GBK" );
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace ();
                 }

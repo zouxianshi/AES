@@ -41,19 +41,6 @@ public class AESCipher implements CipherService {
         fileoutputStream.close();
     }
 
-    /**
-     * 将最终解密的short数组还原为字符串
-     */
-    private String getOrigin(short[][] decryptState) {
-        StringBuilder builder = new StringBuilder();
-        for (short[] shorts : decryptState) {
-            for (short s : shorts) {
-                builder.append( (char) s );
-            }
-        }
-        return builder.toString();
-    }
-
     public static void fileDecrpty(String password, String encodeFile, String decodeFile) throws Exception{
         //根据给定的字节数组(密钥数组)构造一个AES密钥。
         byte[] raw = com.android_aes.administrator.androidaes.AesUtils.getRawKey(password.getBytes());
@@ -82,6 +69,19 @@ public class AESCipher implements CipherService {
     }
 
     /**
+     * 将加密后得到的状态数组转成字节数组
+     */
+    public static byte[] transfer2Bytes(short[][] finalState) {
+        byte[] result = new byte[finalState.length * 4];
+        for (int i = 0;i < finalState.length; i++) {
+            for (int j = 0; j < 4; j++) {
+                result[i * 4 + j] = (byte) (finalState[i][j] & 0xff);
+            }
+        }
+        return result;
+    }
+
+    /**
      * [解密] 将解密扩展密钥数组逆转
      */
     private short[][][] inverseRoundKeys(short[][][] roundKeys) {
@@ -94,25 +94,181 @@ public class AESCipher implements CipherService {
     }
 
     /**
-     * 对外的解密接口
+     * 将最终解密的short数组还原为字符串
+     */
+    private String getOrigin(short[][] decryptState) {
+        StringBuilder builder = new StringBuilder();
+        for (short[] shorts : decryptState) {
+            for (short s : shorts) {
+                builder.append( (char) s );
+            }
+        }
+        return builder.toString();
+    }
+
+    /**
+     * 对外的加密接口
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public String decrypt(String encryptedText, String key,int rounds,String privatepath,boolean PrintFile ,boolean R) throws Exception {
-        System.out.println("\n\n#####################  decryption  #####################");
-        System.out.println ( encryptedText );
-        short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(encryptedText) ));
-        ArrayUtil.printInfo("密文",encryptedText , false);
-        ArrayUtil.printInfo("密码", key, false);
+    @Override
+    public String encrypt(String content, String password, int rounds, String privatePath, boolean printEncrypt, boolean printRawkey) throws IOException {
+        int MODE = 0;
+        System.out.println("#####################  加密  #####################");
+        ArrayUtil.printInfo("明文", content, false);
+        ArrayUtil.printInfo("密钥", password, false);
 
-        short[][] initialKeyState = transfer(ArrayUtil.transferToShorts(key));
+        //明文密钥填充
+        Pkcs7 pkcs7 = new Pkcs7 ();
+        content = new String(pkcs7.pkcs7_pad(content.getBytes (),8));
+        password = new String(pkcs7.pkcs7_pad(password.getBytes (),8));
+        String[] list = Spilt.stringSpilt ( content,16);
 
-        ArrayUtil.printInfo("初始加密矩阵", getStateHex(initialTextState), false);
-        ArrayUtil.printInfo("初始密钥矩阵", getStateHex(initialKeyState), true);
+        short[][] initialpassword = transfer( ArrayUtil.transferToShorts(password));
+        short[][] rawRoundKeys = generateRoundKeys(initialpassword);
+        System.out.println("RoundKeys");
+        File file = new File(privatePath+"/"+"加密过程.txt");
+        if (file.exists ()) {
+            file.delete ();
+        }
+        File file1 = new File(privatePath+"/"+"AES密钥扩展.txt");
+        if (file1.exists ()) {
+            file1.delete ();
+        }
 
-        short[][] decryptState = coreDecrypt(initialTextState, initialKeyState , rounds ,privatepath,PrintFile);
-        String plaintext = getOrigin(decryptState);
-        ArrayUtil.printInfo("plaintext", plaintext, false);
-        return plaintext;
+        boolean print = true;
+        if (print == printRawkey){
+            printRoundKeys(rawRoundKeys,privatePath);
+        }
+
+        short[][][] roundKeys = transfer(rawRoundKeys);
+
+        String temp;
+        StringBuilder result = null;
+        for (String s : list) {
+            short[][] text = transfer ( ArrayUtil.transferToShorts ( s ) );
+            ArrayUtil.printInfo ( "初始加密明文矩阵", getStateHex ( text ), false );
+            ArrayUtil.printInfo ( "初始加密密钥矩阵", getStateHex ( initialpassword ), true );
+            short[][] finalState = coreEncrypt ( text, roundKeys, AESConstants.SUBSTITUTE_BOX,
+                    AESConstants.CX, AESConstants.SHIFTING_TABLE, MODE, rounds, privatePath, printEncrypt );
+            temp = ParseSystemUtil.parseByte2HexStr ( transfer2Bytes ( finalState ) );
+            System.out.println ( "abc" + transfer2Bytes ( finalState ) );
+            result = (result == null ? new StringBuilder () : result).append ( temp );
+            System.out.println ( result.toString () );
+        }
+//        short[][] text = transfer( ArrayUtil.transferToShorts(content));
+//        ArrayUtil.printInfo("初始加密明文矩阵", getStateHex(text), false);
+//        short[][] initialpassword = transfer( ArrayUtil.transferToShorts(password));
+//        ArrayUtil.printInfo("初始加密密钥矩阵", getStateHex(initialpassword), true);
+//        short[][] rawRoundKeys = generateRoundKeys(initialpassword);
+//        System.out.println("RoundKeys");
+//        File file = new File(privatePath+"/"+"加密过程.txt");
+//        if (file.exists ()) {
+//            file.delete ();
+//        }
+//        File file1 = new File(privatePath+"/"+"AES密钥扩展.txt");
+//        if (file1.exists ()) {
+//            file1.delete ();
+//        }
+//
+//        boolean print = true;
+//        if (print == printRawkey){
+//            printRoundKeys(rawRoundKeys,privatePath);
+//        }
+//
+//        short[][][] roundKeys = transfer(rawRoundKeys);
+//        short[][] finalState = coreEncrypt(text, roundKeys, AESConstants.SUBSTITUTE_BOX,
+//                AESConstants.CX, AESConstants.SHIFTING_TABLE,MODE,rounds,privatePath,printEncrypt);
+//        System.out.println ("abc"+transfer2Bytes(finalState) );
+        return String.valueOf ( result );
+    }
+
+    /**
+     * AES核心操作，通过将可逆操作抽取成可逆矩阵作为参数，使该方法能在加/解密操作中复用
+     * @param initialPTState    明文或密文的状态数组
+     * @param roundKeys     加/解密要用到的轮密钥数组
+     * @param substituteTable   加/解密要用到的S盒
+     * @param mixColumnTable    列混合中用来取代既约多项式的数组
+     * @param shiftingTable    行变换中用来决定字间左移的位数的数组
+     * @param MODE 判断加密/解密模式
+     * @param P
+     * @return 加/解密结果
+     */
+
+    private short[][] coreEncrypt(short[][] initialPTState,
+                                  short[][][] roundKeys, short[][] substituteTable,
+                                  short[][] mixColumnTable, short[][] shiftingTable, int MODE, int rounds, String privatePath, boolean P) throws IOException {
+
+        File fileexist = new File ( privatePath+"/"+"加密过程.txt" );
+//        FileWriter file = new FileWriter (privatePath+"/"+"加密过程.txt",true);
+        FileWriter file = new FileWriter ("C://Users//Administrator/Desktop//AES加密流程.txt",true);
+        String M = "";
+        switch (MODE){
+            case 0:
+                file.write (  "------------------加密过程------------------"+ "\r\n\r\n");
+                M="";
+                break;
+            case 1:
+                file.write (  "------------------解密过程------------------"+ "\r\n\r\n");
+                M = "Inv";
+                break;
+        }
+
+
+        // 初始轮密钥加，异或操作
+        short[][] state = xor(roundKeys[0], initialPTState);
+        file.write (  "AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
+        // 处理前九轮变换
+        for (int i = 0; i < rounds - 1; i++) {
+            int N = i + 1;
+            file.write ( "第"+N+"轮\r\n");
+            System.out.println("N = " + N);
+            // 字节替代
+            state = substituteState(state, substituteTable);
+            ArrayUtil.printInfo("SubBytes", getStateHex(state), false);
+            file.write (  M + "SubBytes:"+getStateHex(state) + "\r\n");
+            // 行移位变换
+            state = shiftRows(state, shiftingTable);
+            ArrayUtil.printInfo("ShiftRows", getStateHex(state), false);
+            file.write (  M + "ShiftRows:"+getStateHex(state) + "\r\n");
+            // 列混合变换
+            state = mixColumns(state, mixColumnTable);
+            ArrayUtil.printInfo("MixColumns", getStateHex(state), false);
+            file.write (  M + "MixColumns:"+getStateHex(state) + "\r\n");
+            // 轮密钥加变换
+            ArrayUtil.printInfo("RoundKey", getStateHex(roundKeys[i + 1]), false);
+            switch (MODE){
+                case 0:
+                    state = xor(roundKeys[ i + 1], state);
+                    break;
+                case 1:
+                    state = xor(roundKeys[ i + 11 - rounds ], state);
+            }
+            ArrayUtil.printInfo("AddRoundKeys", getStateHex(state), true);
+            file.write (  M + "AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
+        }
+
+        // 处理最后一轮
+        file.write ( "最终轮\r\n" );
+        System.out.println("N = last");
+        state = substituteState(state, substituteTable);
+        ArrayUtil.printInfo("SubBytes", getStateHex(state), false);
+        file.write (  M+"SubBytes:"+getStateHex(state) +"\r\n");
+
+        state = shiftRows(state, shiftingTable);
+        ArrayUtil.printInfo("ShiftRows", getStateHex(state), false);
+        file.write (  M+"ShiftRows:"+getStateHex(state) + "\r\n");
+
+
+        ArrayUtil.printInfo("RoundKey", getStateHex(roundKeys[roundKeys.length - 1]), false);
+        state = xor(roundKeys[roundKeys.length - 1], state);
+        ArrayUtil.printInfo("AddRoundKeys", getStateHex(state), false);
+        file.write (  M+"AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
+        file.close ();
+        boolean print = false;
+        if(print == P){
+            fileexist.delete ();
+        }
+        return state;
     }
 
     /**
@@ -128,7 +284,6 @@ public class AESCipher implements CipherService {
             printRoundKeys(rawRoundKeys,privatePath);
         }
 
-
         short[][][] roundKeys = transfer(rawRoundKeys);
 
         for (int i = 1; i < roundKeys.length - 1; i++) {
@@ -143,16 +298,32 @@ public class AESCipher implements CipherService {
     }
 
     /**
-     * 将加密后得到的状态数组转成字节数组，便于进行Base64编码
+     * 对外的解密接口
      */
-    public static byte[] transfer2Bytes(short[][] finalState) {
-        byte[] result = new byte[finalState.length * 4];
-        for (int i = 0;i < finalState.length; i++) {
-            for (int j = 0; j < 4; j++) {
-                result[i * 4 + j] = (byte) (finalState[i][j] & 0xff);
-            }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String decrypt(String encryptedText, String password,int rounds,String privatepath,boolean PrintFile ,boolean R) throws Exception {
+        System.out.println("\n\n#####################  decryption  #####################");
+        System.out.println ( encryptedText );
+        ArrayUtil.printInfo("密文",encryptedText , false);
+        ArrayUtil.printInfo("密码", password, false);
+
+        Pkcs7 pkcs7 = new Pkcs7 ();
+        password = new String(pkcs7.pkcs7_pad(password.getBytes (),8));
+        String[] list = Spilt.stringSpilt ( encryptedText,32 );
+
+        String temp;
+        String plaintext = null;
+        short[][] initialKeyState = transfer(ArrayUtil.transferToShorts(password));
+        for (int i = 0 ; i < list.length ; i++){
+            short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(list[0])));
+            ArrayUtil.printInfo("初始加密矩阵", getStateHex(initialTextState), false);
+            ArrayUtil.printInfo("初始密钥矩阵", getStateHex(initialKeyState), true);
+            short[][] decryptState = coreDecrypt(initialTextState, initialKeyState , rounds ,privatepath,PrintFile);
+            temp = getOrigin(decryptState);
+            ArrayUtil.printInfo("plaintext", temp, false);
+            plaintext = plaintext + temp ;
         }
-        return result;
+        return plaintext;
     }
 
     /**
@@ -279,45 +450,6 @@ public class AESCipher implements CipherService {
         return result;
     }
 
-    /**
-     * 对外的加密接口
-     */
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public String encrypt(String content, String password, int rounds, String privatePath, boolean printEncrypt, boolean printRawkey) throws IOException {
-        int MODE = 0;
-        System.out.println("#####################  加密  #####################");
-        ArrayUtil.printInfo("明文", content, false);
-        ArrayUtil.printInfo("密钥", password, false);
-        //将明文转换成short类型
-        short[][] text = transfer( ArrayUtil.transferToShorts(content));
-        ArrayUtil.printInfo("初始16进制明文", getStateHex(text), false);
-        short[][] initialpassword = transfer( ArrayUtil.transferToShorts(password));
-        ArrayUtil.printInfo("初始16进制密钥", getStateHex(initialpassword), true);
-
-        short[][] rawRoundKeys = generateRoundKeys(initialpassword);
-        System.out.println("RoundKeys");
-        File file = new File(privatePath+"/"+"加密过程.txt");
-        if (file.exists ()) {
-            file.delete ();
-        }
-        File file1 = new File(privatePath+"/"+"AES密钥扩展.txt");
-        if (file1.exists ()) {
-            file1.delete ();
-        }
-
-        boolean print = true;
-        if (print == printRawkey){
-            printRoundKeys(rawRoundKeys,privatePath);
-        }
-
-        short[][][] roundKeys = transfer(rawRoundKeys);
-
-        short[][] finalState = coreEncrypt(text, roundKeys, AESConstants.SUBSTITUTE_BOX,
-                AESConstants.CX, AESConstants.SHIFTING_TABLE,MODE,rounds,privatePath,printEncrypt);
-        System.out.println ("abc"+transfer2Bytes(finalState) );
-        return Base64Util.encode(transfer2Bytes(finalState));
-}
 
     /**
      * 将<tt>1 x modeSize</tt>矩阵转成<tt>Nb x 4</tt>状态矩阵，通常用在获取明文和密钥的初始状态数组
@@ -366,94 +498,6 @@ public class AESCipher implements CipherService {
         return builder.toString();
     }
 
-    /**
-     * AES核心操作，通过将可逆操作抽取成可逆矩阵作为参数，使该方法能在加/解密操作中复用
-     * @param initialPTState    明文或密文的状态数组
-     * @param roundKeys     加/解密要用到的轮密钥数组
-     * @param substituteTable   加/解密要用到的S盒
-     * @param mixColumnTable    列混合中用来取代既约多项式的数组
-     * @param shiftingTable    行变换中用来决定字间左移的位数的数组
-     * @param MODE 判断加密/解密模式
-     * @param P
-     * @return 加/解密结果
-     */
-
-    private short[][] coreEncrypt(short[][] initialPTState,
-                                  short[][][] roundKeys, short[][] substituteTable,
-                                  short[][] mixColumnTable, short[][] shiftingTable, int MODE, int rounds, String privatePath, boolean P) throws IOException {
-
-        File fileexist = new File ( privatePath+"/"+"加密过程.txt" );
-//        FileWriter file = new FileWriter (privatePath+"/"+"加密过程.txt",true);
-        FileWriter file = new FileWriter ("C://Users//Administrator/Desktop//AES加密流程.txt",true);
-        String M = "";
-        switch (MODE){
-            case 0:
-                file.write (  "------------------加密过程------------------"+ "\r\n\r\n");
-                M="";
-                break;
-            case 1:
-                file.write (  "------------------解密过程------------------"+ "\r\n\r\n");
-                M = "Inv";
-                break;
-        }
-
-
-        // 初始轮密钥加，异或操作
-        short[][] state = xor(roundKeys[0], initialPTState);
-        file.write (  "AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
-        // 处理前九轮变换
-        for (int i = 0; i < rounds - 1; i++) {
-                int N = i + 1;
-                file.write ( "第"+N+"轮\r\n");
-                System.out.println("N = " + N);
-                // 字节替代
-                state = substituteState(state, substituteTable);
-                ArrayUtil.printInfo("SubBytes", getStateHex(state), false);
-                file.write (  M + "SubBytes:"+getStateHex(state) + "\r\n");
-                // 行移位变换
-                state = shiftRows(state, shiftingTable);
-                ArrayUtil.printInfo("ShiftRows", getStateHex(state), false);
-                file.write (  M + "ShiftRows:"+getStateHex(state) + "\r\n");
-                // 列混合变换
-                state = mixColumns(state, mixColumnTable);
-                ArrayUtil.printInfo("MixColumns", getStateHex(state), false);
-                file.write (  M + "MixColumns:"+getStateHex(state) + "\r\n");
-                // 轮密钥加变换
-                ArrayUtil.printInfo("RoundKey", getStateHex(roundKeys[i + 1]), false);
-                switch (MODE){
-                    case 0:
-                        state = xor(roundKeys[ i + 1], state);
-                        break;
-                    case 1:
-                        state = xor(roundKeys[ i + 11 - rounds ], state);
-                }
-                ArrayUtil.printInfo("AddRoundKeys", getStateHex(state), true);
-                file.write (  M + "AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
-            }
-
-            // 处理最后一轮
-            file.write ( "最终轮\r\n" );
-            System.out.println("N = last");
-            state = substituteState(state, substituteTable);
-            ArrayUtil.printInfo("SubBytes", getStateHex(state), false);
-            file.write (  M+"SubBytes:"+getStateHex(state) +"\r\n");
-
-            state = shiftRows(state, shiftingTable);
-            ArrayUtil.printInfo("ShiftRows", getStateHex(state), false);
-            file.write (  M+"ShiftRows:"+getStateHex(state) + "\r\n");
-
-
-            ArrayUtil.printInfo("RoundKey", getStateHex(roundKeys[roundKeys.length - 1]), false);
-            state = xor(roundKeys[roundKeys.length - 1], state);
-            ArrayUtil.printInfo("AddRoundKeys", getStateHex(state), false);
-            file.write (  M+"AddRoundKeys:"+getStateHex(state) + "\r\n\r\n");
-            file.close ();
-            boolean print = false;
-            if(print == P){
-                    fileexist.delete ();
-            }
-        return state;
-    }
 
     /**
      * 将二维数组转成三维数组，方便在轮变换中通过轮下标获取 Nk x 4 的轮密钥矩阵

@@ -3,7 +3,6 @@ package com.android_aes.administrator.androidaes.Cipher;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -32,7 +31,7 @@ public class Base64Util {
      * @return short array
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static short[] decodeToShorts(String encodedText) {
+    public static short[] decodeToShorts(String encodedText){
         return ArrayUtil.byteToShorts(Base64.getDecoder().decode(encodedText));
     }
 
