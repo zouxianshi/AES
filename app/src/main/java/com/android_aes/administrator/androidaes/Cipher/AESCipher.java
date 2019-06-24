@@ -125,7 +125,7 @@ public class AESCipher implements CipherService {
 
         short[][] initialpassword = transfer( ArrayUtil.transferToShorts(password));
         short[][] rawRoundKeys = generateRoundKeys(initialpassword);
-        System.out.println("RoundKeys");
+
         File file = new File(privatePath+"/"+"加密过程.txt");
         if (file.exists ()) {
             file.delete ();
@@ -137,6 +137,7 @@ public class AESCipher implements CipherService {
 
         boolean print = true;
         if (print == printRawkey){
+            System.out.println("RoundKeys");
             printRoundKeys(rawRoundKeys,privatePath);
         }
 
@@ -312,10 +313,10 @@ public class AESCipher implements CipherService {
         String[] list = Spilt.stringSpilt ( encryptedText,32 );
 
         String temp;
-        String plaintext = null;
+        String plaintext = "";
         short[][] initialKeyState = transfer(ArrayUtil.transferToShorts(password));
         for (int i = 0 ; i < list.length ; i++){
-            short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(list[0])));
+            short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(list[i])));
             ArrayUtil.printInfo("初始加密矩阵", getStateHex(initialTextState), false);
             ArrayUtil.printInfo("初始密钥矩阵", getStateHex(initialKeyState), true);
             short[][] decryptState = coreDecrypt(initialTextState, initialKeyState , rounds ,privatepath,PrintFile);
