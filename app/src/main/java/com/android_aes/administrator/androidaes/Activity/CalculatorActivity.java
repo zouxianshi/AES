@@ -126,6 +126,12 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
             e.printStackTrace ();
             Toast.makeText ( CalculatorActivity.this, "请输入正确内容", Toast.LENGTH_SHORT ).show ();
         }
-        Toast.makeText ( CalculatorActivity.this, "计算成功", Toast.LENGTH_SHORT ).show ();
+
+        String printnotnull = print.getText ().toString ().trim ();
+        if (printnotnull.isEmpty ()){
+            Toast.makeText ( CalculatorActivity.this, "请输入正确内容", Toast.LENGTH_SHORT ).show ();
+        }else{
+            Toast.makeText ( CalculatorActivity.this, "计算成功", Toast.LENGTH_SHORT ).show ();
+        }
     }
 }

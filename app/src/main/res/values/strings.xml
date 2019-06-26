@@ -1,9 +1,9 @@
 <resources>
 
-    <string name="Text_Content">请输入长度为128位的字符</string>
+    <string name="Text_Content">请输入字符</string>
     <string name="Text_File">文件路径</string>
     <string name="Button_Browse">浏览</string>
-    <string name="Text_Key">请输入长度为128位的密码</string>
+    <string name="Text_Key">请输入密码</string>
     <string name="Text_Result">加解密结果</string>
     <string name="Button_Encrypt">加密</string>
     <string name="Button_Decrypt">解密</string>
@@ -19,8 +19,8 @@
     <string name="YES">是</string>
     <string name="NO">否</string>
     <string name="raws">10</string>
-    <string name="Positive">正序</string>
-    <string name="inverted">倒序</string>
+    <string name="Positive">正向</string>
+    <string name="inverted">逆向</string>
     <string name="xor">请输入异或矩阵</string>
     <string name="save">保存</string>
     <string name="MainActivity">主界面</string>

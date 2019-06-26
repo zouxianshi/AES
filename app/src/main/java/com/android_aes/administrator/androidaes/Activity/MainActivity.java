@@ -123,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
                         try{
                             AESCipher AESCipher = new AESCipher ();
                             String result = AESCipher.encrypt ( content, password ,round,privatePath ,PrintFile,PrintRawkey);
-                            //String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(AESCipher.transfer( Base64Util.decodeToShorts(result))));
                             Text_Result.setText (  result );
                             Toast.makeText ( getApplicationContext (), "加密成功", Toast.LENGTH_SHORT ).show ();
                         }catch (Exception e){
@@ -146,7 +145,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
-
 
 
              //点击解密处理方法
@@ -189,8 +187,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-
-
             //点击浏览处理方法
             if (v.getId () == R.id.Button_Browse) {
                 showFileChooser ();
@@ -202,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
 
 
     //调用文件选择器
@@ -217,8 +212,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText ( this, "请安装文件管理器", Toast.LENGTH_SHORT ).show ();
         }
     }
-
-
 
 
     //回传获取到的路径和文件名
@@ -253,5 +246,3 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult ( requestCode, resultCode, data );
     }
 }
-
-
