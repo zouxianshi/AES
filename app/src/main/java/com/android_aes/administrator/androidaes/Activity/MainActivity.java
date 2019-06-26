@@ -18,9 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android_aes.administrator.androidaes.AesUtils;
 import com.android_aes.administrator.androidaes.Cipher.AESCipher;
-import com.android_aes.administrator.androidaes.Cipher.Base64Util;
 import com.android_aes.administrator.androidaes.R;
 import com.android_aes.administrator.androidaes.UriToPathUtil;
 
@@ -125,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
                         try{
                             AESCipher AESCipher = new AESCipher ();
                             String result = AESCipher.encrypt ( content, password ,round,privatePath ,PrintFile,PrintRawkey);
-                            String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(AESCipher.transfer( Base64Util.decodeToShorts(result))));
-                            Text_Result.setText (  message );
+                            //String message =  AesUtils.parseByte2HexStr (AESCipher.transfer2Bytes(AESCipher.transfer( Base64Util.decodeToShorts(result))));
+                            Text_Result.setText (  result );
                             Toast.makeText ( getApplicationContext (), "加密成功", Toast.LENGTH_SHORT ).show ();
                         }catch (Exception e){
                             e.printStackTrace ();
