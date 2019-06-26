@@ -4,6 +4,9 @@ public class Pkcs7 {
     public static byte[] pkcs7_pad(byte[] source, int blocksize) {
         int sourceLength = source.length;
         int padDataLen = blocksize - (sourceLength % blocksize);
+        if (padDataLen == 0){
+            padDataLen = 16;
+        }
         int afterPadLen = sourceLength + padDataLen;
         byte[] paddingResult = new byte[afterPadLen];
         System.arraycopy(source, 0, paddingResult, 0, sourceLength);

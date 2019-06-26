@@ -10,6 +10,7 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 
 @SuppressLint("Registered")
@@ -119,8 +120,8 @@ public class AESCipher implements CipherService {
 
         //明文密钥填充
         Pkcs7 pkcs7 = new Pkcs7 ();
-        content = new String(pkcs7.pkcs7_pad(content.getBytes (),8));
-        password = new String(pkcs7.pkcs7_pad(password.getBytes (),8));
+        content = new String(pkcs7.pkcs7_pad(content.getBytes (),16));
+        password = new String(pkcs7.pkcs7_pad(password.getBytes (),16));
         String[] list = Spilt.stringSpilt ( content,16);
 
         short[][] initialpassword = transfer( ArrayUtil.transferToShorts(password));
@@ -145,41 +146,17 @@ public class AESCipher implements CipherService {
 
         String temp;
         StringBuilder result = null;
-        for (String s : list) {
-            short[][] text = transfer ( ArrayUtil.transferToShorts ( s ) );
+        for (int i = 0 ; i<list.length;i++) {
+            short[][] text = transfer ( ArrayUtil.transferToShorts ( list[i] ) );
             ArrayUtil.printInfo ( "初始加密明文矩阵", getStateHex ( text ), false );
             ArrayUtil.printInfo ( "初始加密密钥矩阵", getStateHex ( initialpassword ), true );
             short[][] finalState = coreEncrypt ( text, roundKeys, AESConstants.SUBSTITUTE_BOX,
                     AESConstants.CX, AESConstants.SHIFTING_TABLE, MODE, rounds, privatePath, printEncrypt );
-            temp = ParseSystemUtil.parseByte2HexStr ( transfer2Bytes ( finalState ) );
+            temp = ParseSystemUtil.parseByte2HexStr ((transfer2Bytes ( finalState )) );
             System.out.println ( "abc" + transfer2Bytes ( finalState ) );
             result = (result == null ? new StringBuilder () : result).append ( temp );
             System.out.println ( result.toString () );
         }
-//        short[][] text = transfer( ArrayUtil.transferToShorts(content));
-//        ArrayUtil.printInfo("初始加密明文矩阵", getStateHex(text), false);
-//        short[][] initialpassword = transfer( ArrayUtil.transferToShorts(password));
-//        ArrayUtil.printInfo("初始加密密钥矩阵", getStateHex(initialpassword), true);
-//        short[][] rawRoundKeys = generateRoundKeys(initialpassword);
-//        System.out.println("RoundKeys");
-//        File file = new File(privatePath+"/"+"加密过程.txt");
-//        if (file.exists ()) {
-//            file.delete ();
-//        }
-//        File file1 = new File(privatePath+"/"+"AES密钥扩展.txt");
-//        if (file1.exists ()) {
-//            file1.delete ();
-//        }
-//
-//        boolean print = true;
-//        if (print == printRawkey){
-//            printRoundKeys(rawRoundKeys,privatePath);
-//        }
-//
-//        short[][][] roundKeys = transfer(rawRoundKeys);
-//        short[][] finalState = coreEncrypt(text, roundKeys, AESConstants.SUBSTITUTE_BOX,
-//                AESConstants.CX, AESConstants.SHIFTING_TABLE,MODE,rounds,privatePath,printEncrypt);
-//        System.out.println ("abc"+transfer2Bytes(finalState) );
         return String.valueOf ( result );
     }
 
@@ -272,16 +249,60 @@ public class AESCipher implements CipherService {
         return state;
     }
 
+
+    /**
+     * 对外的解密接口
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public String decrypt(String encryptedText, String password,int rounds,String privatePath,boolean printRawkey ,boolean R) throws Exception {
+        System.out.println("\n\n#####################  decryption  #####################");
+        System.out.println ( encryptedText );
+        ArrayUtil.printInfo("密文",encryptedText , false);
+        ArrayUtil.printInfo("密码", password, false);
+
+        Pkcs7 pkcs7 = new Pkcs7 ();
+        password = new String(pkcs7.pkcs7_pad(password.getBytes (),8));
+        String[] list = Spilt.stringSpilt ( encryptedText,32 );
+        short[][][] inverseRoundKeys = inverseRoundKeys (password,privatePath,printRawkey);
+        short[][] keyState = transfer(ArrayUtil.transferToShorts(password));
+
+        String temp;
+        StringBuilder plaintext = new StringBuilder ();
+        for (int i = 0 ; i < list.length ; i++ ) {
+            short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte ( list[i] ) ) );
+            ArrayUtil.printInfo ( "初始解密矩阵", getStateHex ( initialTextState ), false );
+            ArrayUtil.printInfo ( "初始密钥矩阵", getStateHex ( keyState ), true );
+            short[][] decryptState = coreDecrypt ( initialTextState, inverseRoundKeys, rounds, privatePath,printRawkey);
+            temp = getOrigin ( decryptState );
+            byte[] decrypt;
+            if (i == list.length - 1){
+                decrypt = Pkcs7.pkcs7_unpad ( temp.getBytes ()  );
+            }else{
+                decrypt = temp.getBytes ();
+            }
+            ArrayUtil.printInfo ( "plaintext", new String ( decrypt , StandardCharsets.UTF_8 ), false );
+            plaintext.append ( new String ( decrypt , StandardCharsets.UTF_8 ) );
+        }
+        return String.valueOf ( plaintext );
+    }
+
     /**
      * 解密逻辑：将可逆操作抽取
      */
-    private short[][] coreDecrypt(short[][] encryptedTextState, short[][] keyState,int rounds,String privatePath,boolean printRawkey) throws IOException {
+    private short[][] coreDecrypt(short[][] encryptedTextState, short[][][] inverseRoundKeys,int rounds,String privatePath,boolean printRawkey) throws IOException {
         int MODE = 1 ;
+        return coreEncrypt(encryptedTextState, inverseRoundKeys, AESConstants.
+                INVERSE_SUBSTITUTE_BOX, AESConstants.INVERSE_CX, AESConstants.INVERSE_SHIFTING_TABLE,MODE,rounds,privatePath,printRawkey);
+    }
+
+    private short[][][] inverseRoundKeys(String password ,String privatePath ,boolean printRawkey) throws IOException {
+
+        short[][] keyState = transfer(ArrayUtil.transferToShorts(password));
         short[][] rawRoundKeys = generateRoundKeys(keyState);
-        System.out.println("RoundKeys");
 
         boolean print = true;
         if (print == printRawkey){
+            System.out.println("RoundKeys");
             printRoundKeys(rawRoundKeys,privatePath);
         }
 
@@ -294,37 +315,7 @@ public class AESCipher implements CipherService {
         short[][][] inverseRoundKeys = inverseRoundKeys(roundKeys);
         System.out.println("inverse roundKeys");
         printRoundKeys(inverseRoundKeys,privatePath);
-        return coreEncrypt(encryptedTextState, inverseRoundKeys, AESConstants.
-                INVERSE_SUBSTITUTE_BOX, AESConstants.INVERSE_CX, AESConstants.INVERSE_SHIFTING_TABLE,MODE,rounds,privatePath,printRawkey);
-    }
-
-    /**
-     * 对外的解密接口
-     */
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public String decrypt(String encryptedText, String password,int rounds,String privatepath,boolean PrintFile ,boolean R) throws Exception {
-        System.out.println("\n\n#####################  decryption  #####################");
-        System.out.println ( encryptedText );
-        ArrayUtil.printInfo("密文",encryptedText , false);
-        ArrayUtil.printInfo("密码", password, false);
-
-        Pkcs7 pkcs7 = new Pkcs7 ();
-        password = new String(pkcs7.pkcs7_pad(password.getBytes (),8));
-        String[] list = Spilt.stringSpilt ( encryptedText,32 );
-
-        String temp;
-        String plaintext = "";
-        short[][] initialKeyState = transfer(ArrayUtil.transferToShorts(password));
-        for (int i = 0 ; i < list.length ; i++){
-            short[][] initialTextState = transfer ( ArrayUtil.byteToShorts ( ParseSystemUtil.parseHexStr2Byte(list[i])));
-            ArrayUtil.printInfo("初始加密矩阵", getStateHex(initialTextState), false);
-            ArrayUtil.printInfo("初始密钥矩阵", getStateHex(initialKeyState), true);
-            short[][] decryptState = coreDecrypt(initialTextState, initialKeyState , rounds ,privatepath,PrintFile);
-            temp = getOrigin(decryptState);
-            ArrayUtil.printInfo("plaintext", temp, false);
-            plaintext = plaintext + temp ;
-        }
-        return plaintext;
+        return inverseRoundKeys;
     }
 
     /**

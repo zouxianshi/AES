@@ -9,7 +9,7 @@ import java.io.File;
 public class ExampleUnitTest{
 
     public static void main(String[] args) throws Exception {
-        String content = "zouxianshiygfcytfygqweqwey875676678uguyugy";
+        String content = "zouxianshizouxia1241345135";
         String password = "12345678901";
         String rounds = "10";
         int round = Integer.parseInt(rounds);
@@ -26,8 +26,6 @@ public class ExampleUnitTest{
         String encrypt = AESCipher.encrypt ( content ,password,round,filepath,true,true);
         assert encrypt != null;
         System.out.println("加密后的内容：" + encrypt);
-//        short[][] initialTextState = AESCipher.transfer( Base64Util.decodeToShorts(encrypt));
-//        String[] e = Spilt.stringSpilt ( encrypt,32 );
         String decrypt = AESCipher.decrypt ( encrypt,password,round,filepath,true,true );
         System.out.println("解密后的内容：" + decrypt );
     }
